@@ -4,7 +4,7 @@ import { useUsername } from "@/hooks/use-username";
 import { client } from "@/lib/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation"
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { useRealtime } from "@/lib/realtime-client";
 
@@ -25,8 +25,48 @@ export default function ChatRoom(){
     const [input, setInput] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const messagesContainerRef = useRef<HTMLDivElement>(null)
+    const bottomRef = useRef<HTMLDivElement>(null)
+
+
     const [copyStatus, setCopyStatus] = useState("COPY");
-    const [timeRemaining, setTimeRemaining] = useState<number | null>(50);
+    const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+
+    const { data :ttlData } = useQuery({
+        queryKey: ["ttl", roomId],
+        queryFn: async () => {
+            const res = await client.room.ttl.get( {
+                query: { roomId }} )
+                return res.data
+        }
+    })
+
+    useEffect(() => {
+        if (ttlData?.ttl !== undefined )
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setTimeRemaining(ttlData.ttl)
+    }, [ttlData])
+
+    useEffect( () => {
+        if (timeRemaining === null || timeRemaining < 0) return
+
+        if (timeRemaining === 0) {
+            router.push("/?destroyed=true")
+        }
+
+        const interval = setInterval(() => {
+            setTimeRemaining((prev) => {
+                if (prev === null || prev <= 1) {
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [timeRemaining, router])
+
+
 
     const { data: messages, refetch} = useQuery({
         queryKey: ["messages", roomId],
@@ -48,7 +88,6 @@ export default function ChatRoom(){
                 }
             }
         )
-
         setInput("")
         },
     })
@@ -67,12 +106,34 @@ export default function ChatRoom(){
         }
     })
 
+    const { mutate: destroyRoom } = useMutation({
+        mutationFn: async () => {
+            await client.room.delete(null, {
+                query: { roomId } }) 
+        },
+    })
+
     const copyLink = () => {
         const url = window.location.href
         navigator.clipboard.writeText(url)
         setCopyStatus("COPIED!")
         setTimeout(() => setCopyStatus("COPY"), 5000)
     }
+
+    useEffect(() => {
+        const container = messagesContainerRef.current
+        if (!container) return
+
+        const isNearBottom =
+            container.scrollHeight -
+            container.scrollTop -
+            container.clientHeight < 100
+
+        if (isNearBottom) {
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+        }
+        }, [messages?.messages.length])
+
 
 
     return <main className="flex flex-col h-screen max-h-screen overflow-hidden">
@@ -99,7 +160,9 @@ export default function ChatRoom(){
                 </div>
             </div>
 
-            <button className="text-xs bg-zinc-800 hover:bg-red-600 px-3
+            <button
+            onClick={() => destroyRoom()} 
+            className="text-xs bg-zinc-800 hover:bg-red-600 px-3
             py-1.5 rounded text-zinc-400 hover:text-white font-bold transition-all
             group flex items-center gap-2 disabled:opacity-50">
                 <span className="group-hover:animate-pulse">💣</span>
@@ -108,7 +171,9 @@ export default function ChatRoom(){
         </header>
     
     {/*MESSAGES PART*/}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
+        <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
             {messages?.messages.length === 0 && (
                 <div className="flex items-center justify-center h-full">
                     <p className="text-zinc-600 text-sm font-mono">
@@ -136,6 +201,8 @@ export default function ChatRoom(){
                     </div>
                 </div>
             ))}
+
+            <div ref={bottomRef} />
         </div>
 
         <div className="p-4 border-t border-zinc-800 bg-zinc-900/30">
