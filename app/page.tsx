@@ -64,10 +64,10 @@ function Lobby() {
 
 
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight text-green-500">
-            {">"}private_chat
+          <h1 className="text-3xl font-bold tracking-tight text-green-500">
+            {">"}noTrace_chat
           </h1>
-          <p className="text-zinc-600 text-sm">
+          <p className="text-zinc-600 text-[15px]">
             A private, self-destructing chat room.
           </p>
         </div>
