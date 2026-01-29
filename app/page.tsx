@@ -35,28 +35,29 @@ function Lobby() {
 
   })
 
-  return <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+  return <main className="flex min-h-screen flex-col items-center justify-center sm:p-4 p-6">
+      <div className="w-full max-w-md space-y-5.5 sm:space-y-8">
 
 
-        {wasDestroyed &&  <div
-        className="bg-red-950/50 border border-red-900 p-4 text-center">
-          <p className="text-red-500 text-sm font-bold">ROOM DESTROYED</p>
-          <p className="text-zinc-500 text-xs mt-1">
+        { wasDestroyed && <div
+        className="bg-red-950/50 border border-red-900 p-2 sm:p-4 text-center">
+          <p className="text-red-500 text-[12px] sm:text-sm font-bold">ROOM DESTROYED</p>
+          <p className="text-zinc-500 text-[10px] sm:text-xs mt-1">
             All messages were permanently deleted. 
           </p>
-          </div>}
+          </div>
+          }
         {error === "room-not-found" &&  <div
         className="bg-red-950/50 border border-red-900 p-4 text-center">
-          <p className="text-red-500 text-sm font-bold">ROOM NOT FOUND</p>
-          <p className="text-zinc-500 text-xs mt-1">
+          <p className="text-red-500 text-[12px] sm:text-sm font-bold">ROOM NOT FOUND</p>
+          <p className="text-zinc-500 text-[10px] sm:text-xs mt-1">
             This room may have expired or never existed. 
           </p>
           </div>}
         {error === "room-full" &&  <div
         className="bg-red-950/50 border border-red-900 p-4 text-center">
-          <p className="text-red-500 text-sm font-bold">ROOM FULL</p>
-          <p className="text-zinc-500 text-xs mt-1">
+          <p className="text-red-500 text-[12px] sm:text-sm font-bold">ROOM FULL</p>
+          <p className="text-zinc-500 text-[10px] sm:text-xs mt-1">
             This room is at maximum capacity. 
           </p>
           </div>}
@@ -64,15 +65,15 @@ function Lobby() {
 
 
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-green-500">
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-green-500">
             {">"}noTrace_chat
           </h1>
-          <p className="text-zinc-600 text-[15px]">
+          <p className="text-zinc-600 text-[11px] sm:text-[15px]">
             A private, self-destructing chat room.
           </p>
         </div>
 
-        <div className="border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-md">
+        <div className="border border-zinc-800 bg-zinc-900/50 p-5 sm:p-6 backdrop-blur-md">
           <div className="space-y-5">
             <div className="space-y-2">
               <label className="flex items-center text-zinc-500">Your Identity</label>
